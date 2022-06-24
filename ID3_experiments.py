@@ -26,21 +26,18 @@ def find_best_pruning_m(train_dataset: np.array, m_choices, num_folds=5):
         best_M: the value of M with the highest mean accuracy across folds
         accuracies: The accuracies per fold for each M (list of lists).
     """
-
     accuracies = []
     for i, m in enumerate(m_choices):
         model = ID3(label_names=attributes_names, min_for_pruning=m)
-        # TODO:
-        #  - Add a KFold instance of sklearn.model_selection, pass <ID> as random_state argument.
-        #  - Train model num_folds times with different train/val data.
-        #  Don't use any third-party libraries.
-        #  You can use create_train_validation_split train/validation splitter from utils.py
-        #  (note that then it won't be exactly k-fold CV since it will be a random split each iteration),
-        #  or implement something else.
+        m_acc = []
+        kf = KFold(n_splits=num_folds, shuffle=True, random_state=ID)
+        for train, test in create_train_validation_split(train_dataset, kf):
+                X_train, Y_train, X_test, Y_test = get_dataset_split(train, test, target_attribute)
+                model.fit(X_train, Y_train)
+                Y_pred = model.predict(X_test)
+                m_acc.append(accuracy(Y_test, Y_pred))
 
-        # ====== YOUR CODE: ======
-        raise NotImplementedError
-        # ========================
+        accuracies.append(np.mean(m_acc))
 
     best_m_idx = np.argmax([np.mean(acc) for acc in accuracies])
     best_m = m_choices[best_m_idx]
@@ -48,15 +45,12 @@ def find_best_pruning_m(train_dataset: np.array, m_choices, num_folds=5):
     return best_m, accuracies
 
 
-# ========================================================================
 def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
     """
     Use ID3 model, to train on the training dataset and evaluating the accuracy in the test set.
     """
     tree = ID3(attributes_names)
-
     tree.fit(x_train, y_train)
-
     y_pred = tree.predict(x_test)
     acc = accuracy(y_test, y_pred)
 
@@ -64,7 +58,6 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
     print(f'Test Accuracy: {acc * 100:.2f}%' if formatted_print else acc)
 
 
-# ========================================================================
 def cross_validation_experiment(plot_graph=True):
     """
     Use cross validation to find the best M for the ID3 model, used as pruning parameter.
@@ -72,26 +65,16 @@ def cross_validation_experiment(plot_graph=True):
     :param plot_graph: either to plot or not the experiment result, default is True
     :return: best_m: the value of M with the highest mean accuracy across folds
     """
-    # TODO:
-    #  - fill the m_choices list with  at least 5 different values for M.
-    #  - Instate ID3 decision tree instance.
-    #  - Fit the tree on the training data set.
-    #  - Test the model on the test set (evaluate the accuracy) and print the result.
-
     best_m = None
     accuracies = []
-    m_choices = []
+    m_choices = [50, 70, 90, 110, 130, 150, 170, 190]
     num_folds = 5
+    best_m, accuracies = find_best_pruning_m(train_dataset, m_choices, num_folds)
 
-    # ====== YOUR CODE: ======
-    assert len(m_choices) >= 5, 'fill the m_choices list with  at least 5 different values for M.'
-    raise NotImplementedError
-
-    # ========================
     accuracies_mean = np.array([np.mean(acc) * 100 for acc in accuracies])
     if plot_graph:
         util_plot_graph(x=m_choices, y=accuracies_mean, x_label='M', y_label='Validation Accuracy %')
-        print('{:^10s} | {:^10s}'.format('M value', 'Validation Accuracy'))
+        print('{:^10s} | {:^10s}'.format('M value', 'nValidation Accuracy'))
         for i, m in enumerate(m_choices):
             print('{:^10d} | {:.2f}%'.format(m, accuracies_mean[i]))
         print(f'===========================')
@@ -110,19 +93,10 @@ def best_m_test(x_train, y_train, x_test, y_test, min_for_pruning):
         :param: best_m: the value of M with the highest mean accuracy across folds
         :return: acc: the accuracy value of ID3 decision tree instance that using the best_m as the pruning parameter.
     """
-
-    # TODO:
-    #  - Instate ID3 decision tree instance (using pre-training pruning condition).
-    #  - Fit the tree on the training data set.
-    #  - Test the model on the test set (evaluate the accuracy) and return the result.
-
-    acc = None
-
-    # ====== YOUR CODE: ======
-    raise NotImplementedError
-    # ========================
-
-    return acc
+    tree = ID3(attributes_names, min_for_pruning=min_for_pruning)
+    tree.fit(x_train, y_train)
+    y_pred = tree.predict(x_test)
+    return accuracy(y_test, y_pred)
 
 
 # ========================================================================

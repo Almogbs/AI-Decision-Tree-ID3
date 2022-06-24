@@ -123,7 +123,7 @@ class ID3:
                 or leaf if we have to prune this branch (in which cases ?)
         """
         counts = class_counts(rows, labels)
-        if len(counts) <= 1:
+        if len(counts) <= 1 or len(rows) < self.min_for_pruning:
             return Leaf(rows, labels)
 
         _, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels = self.find_best_split(rows, labels)
@@ -154,7 +154,10 @@ class ID3:
             node = self.tree_root
 
         if isinstance(node, Leaf):
-            return list(node.predictions.keys())[0]
+            count = list(node.predictions.values())
+            labels = list(node.predictions.keys())
+            return labels[count.index(max(count))]
+            #return list(node.predictions.keys())[0]
         
         if node.question.match(row):
             return self.predict_sample(row, node.true_branch)
