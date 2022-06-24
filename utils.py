@@ -1,3 +1,4 @@
+from math import sqrt
 import pathlib
 
 import numpy as np
@@ -14,7 +15,7 @@ from sklearn.model_selection import KFold
 ========================================================================
 """
 
-ID = 123456789  # TODO: change it to your personal ID
+ID = 316110535
 random_gen = RandomState(seed=ID)
 print_formatted_values = False
 
@@ -32,16 +33,10 @@ def accuracy(y: np.array, y_pred: np.array):
     :param y_pred: Predictions vector of shape (N,)
     :return: The prediction accuracy as a fraction.
     """
-    # TODO: Calculate prediction accuracy. Don't use an explicit loop.
-
     assert y.shape == y_pred.shape
     assert y.ndim == 1
 
-    # ====== YOUR CODE: ======
-    raise NotImplementedError
-    # ========================
-
-    return accuracy_val
+    return sum(abs(y == y_pred))/len(y)
 
 
 def l2_dist(x1: np.array, x2: np.array):
@@ -53,15 +48,11 @@ def l2_dist(x1: np.array, x2: np.array):
     :return: A distance matrix of shape (N1, N2) where the entry i, j
     represents the distance between x1 sample i and x2 sample j.
     """
-    # TODO:
-    #  Implement L2-distance calculation efficiently as possible.
-    #  Note: Use only basic numpy operations, no external code.
-
-    dists = None
-
-    # ====== YOUR CODE: ======
-    raise NotImplementedError
-    # ========================
+    dists = np.zeros((len(x1), len(x2)))
+    for i in range(len(x1)):
+        for j in range(len(x2)):
+            temp = (x1[i] - x2[j])**2
+            dists[i][j] = np.sqrt(sum(temp))
 
     return dists
 
@@ -74,9 +65,9 @@ def load_data_set(clf_type: str):
     """
     assert clf_type in ('ID3', 'KNN'), 'The parameter clf_type must be ID3 or KNN'
     hw_path = str(pathlib.Path(__file__).parent.absolute())
-    dataset_path = hw_path + f"\\{clf_type}-dataset\\"
-    train_file_path = dataset_path + "\\train.csv"
-    test_file_path = dataset_path + "\\test.csv"
+    dataset_path = hw_path + f"/{clf_type}-dataset/"
+    train_file_path = dataset_path + "/train.csv"
+    test_file_path = dataset_path + "/test.csv"
     # Import all columns omitting the fist which consists the names of the attributes
     train_dataset = pd.read_csv(train_file_path)
     test_dataset = pd.read_csv(test_file_path)
